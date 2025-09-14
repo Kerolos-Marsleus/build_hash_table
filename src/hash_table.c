@@ -44,3 +44,13 @@ void ht_del_hash_table(ht_hash_table* ht){
     free(ht->items);
     free(ht);
 }
+
+static int ht_hash(const char* str, const int prime_number, const int ht_size){
+    long hash = 0;
+    const int len_str = strlen(str);
+    for(int i = 0; i < len_str; i++){
+        hash += (long)pow(prime_number, len_str - (i+1)) * str[i];
+        hash = hash % ht_size;
+    }
+    return (int)hash;
+}
