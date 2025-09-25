@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hash_table.h"
-
+static ht_item HT_DELETED_ITEM = {NULL, NULL};
 
 static ht_item* ht_new_item(const char* k, const char* v){
     ht_item* i = malloc(sizeof(ht_item));
@@ -71,8 +71,15 @@ void ht_insert(ht_hash_table* ht,const char* key,const char* value){
     int index = ht_get_hash(item->key, ht->size, 0);
     ht_item* current_item = ht->items[index];
     int i = 1;
-    while(current_item != NULL){
-        index = ht_get_hash(item->key, ht->size, 1);
+    while(current_item != NULL ){
+        if(current_item != &HT_DELETED_ITEM){
+            if(strcmp(current_item->key, key) == 0){
+                ht_del_item(current_item);
+                ht->items[index] = item;
+                return;
+            }
+        }
+        index = ht_get_hash(item->key, ht->size, i);
         current_item = ht->items[index];
         i++;
     }
@@ -85,8 +92,10 @@ char* ht_search(ht_hash_table* ht, const char* key){
     ht_item* item = ht->items[index];
     int i = 1;
     while(item != NULL){
-        if(strcmp(key, ht->items[index]) == 0){
-            return item->value;
+        if(item != & HT_DELETED_ITEM){
+            if(strcmp(key, item->key) == 0){
+                return item->value;
+            }
         }
         index = ht_get_hash(key, ht->size, i);
         i++;
@@ -96,7 +105,7 @@ char* ht_search(ht_hash_table* ht, const char* key){
 }
 
 
-static ht_item HT_DELETED_ITEM = {NULL, NULL};
+
 
 void ht_delete(ht_hash_table* ht, const char* key){
     int index = ht_get_hash(key, ht->size, 0);
@@ -114,4 +123,12 @@ void ht_delete(ht_hash_table* ht, const char* key){
         i++;
     }
     ht->count--;
+}
+
+
+static ht_hash_table* ht_new_sized(const int base_size){
+    ht_hash_table* ht = malloc(sizeof(ht_hash_table));
+    if(!ht){
+        return NULL;
+    }
 }
